@@ -1,5 +1,15 @@
 import os
+import re
 import sqlite3
+import random
+from models import Word
+
+# TODO:
+# * Capitalize stuff
+# * Also capitalize words-with-dashes
+# * Remove (...)-suffixes
+# * More patterns
+# 
 
 class Igures(object):
 	'''Main class for Igures.
@@ -57,6 +67,22 @@ class Igures(object):
 		
 		t = t1 - t0
 		print("Imported %d words in %s seconds" % (words_imported, t))
+	
+	def generate(self):
+		pattern = random.choice(config.PATTERNS)
+		
+		# Yes, this is horribly inefficient...
+		c = self.db.cursor()
+		sql = "SELECT word FROM words WHERE id = (ABS(RANDOM())%((SELECT COUNT(*) FROM words WHERE class = ? AND freq <= ?)+1));"
+		fetchlambda = lambda match: self._one_word_query(c, sql, (match.group(1),config.FREQUENCY_THRESHOLD))
+		return config.PATTERN_PLACEHOLDER_EXP.sub(fetchlambda, pattern)
+	
+	def _one_word_query(self, c, sql, params=()):
+		c.execute(sql, params)
+		word = c.fetchone()[0]
+		return self._make_word_presentable(word)
+	def _make_word_presentable(self, word):
+		return word.replace('_', ' ')
 
 class NoDatabaseException(Exception):
 	pass
@@ -77,4 +103,5 @@ if __name__ == '__main__':
 		#	print(w)
 	
 	igures = Igures(config.DATABASE, source)
-
+	sentence = igures.generate()
+	print(sentence)
