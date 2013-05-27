@@ -2,10 +2,17 @@ import os
 import sqlite3
 
 class Igures(object):
+	'''Main class for Igures.
+	This is the class you most likely want to talk to.'''
 	db = None
 	
 	def __init__(self, db_path, source = None):
+		'''Create a new Igures, using the specific database and optional source.
+		If the database doesn't exist, and source is specified, it will be 
+		created and populated by words pulled from the source.'''
+		
 		if source:
+			os.remove(db_path)
 			self._db_connect(db_path)
 			self._db_setup()
 			self._import(source)
@@ -19,7 +26,6 @@ class Igures(object):
 	
 	def _db_setup(self):
 		print("Setting up a new database...")
-		self.db.execute('DROP TABLE words')
 		self.db.execute('''
 			CREATE TABLE words (
 				id INTEGER PRIMARY KEY,

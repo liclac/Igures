@@ -2,6 +2,7 @@ import os
 from models import Word, WordSource
 
 class WordNetDict(WordSource):
+	'''A source that reads a WordNet database.'''
 	classes = ['adj', 'adv', 'noun', 'verb']
 	files = []
 	
